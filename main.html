@@ -1,60 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="app.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dTMM/FDM Schrodinger Solver Web Port</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <title>Optoelectronic Simulator GUI</title>
 </head>
 <body>
-
-<div class="container">
-    <div class="sidebar">
-        <h2>Simulation Parameters</h2>
-        
-        <label>Layer Data (Width [Å] | Molar %)</label>
-        <textarea id="layer_file" rows="4" placeholder="200 0.15&#10;200 0&#10;20 0.15"></textarea>
-
-        <label>Material System</label>
-        <select id="material">
-            <option value="AlGaAs">AlGaAs</option>
-            <option value="AlGaSb">AlGaSb</option>
-            <option value="InGaAs/InAlAs">InGaAs/InAlAs</option>
-            <option value="InGaAs/GaAsSb">InGaAs/GaAsSb</option>
-        </select>
-
-        <label>Solver Type</label>
-        <select id="solver">
-            <option value="TMM">dTMM (Transfer Matrix)</option>
-            <option value="FDM">FDM (Finite Difference)</option>
-        </select>
-
-        <label>Nonparabolicity Type</label>
-        <select id="nonparabolicityType">
-            <option value="Parabolic">Parabolic</option>
-            <option value="Kane">Kane (Full two band)</option>
-            <option value="Taylor">Taylor Expansion</option>
-            <option value="Ekenberg">Ekenberg (14kp - TMM Only)</option>
-        </select>
-
-        <label>States to Show (nstamx)</label>
-        <input type="number" id="nstamx" value="5">
-
-        <label>Spatial Resolution (dz) [Å]</label>
-        <input type="number" id="dz" value="1.0" step="0.1">
-
-        <label>Padding [Å]</label>
-        <input type="number" id="padding" value="100">
-
-        <button onclick="runSimulation()">Run Simulation</button>
+    <div class="container">
+        <h2>Simulator Parameters</h2>
+        <div class="input-group">
+            <label for="wellWidth">Well Width (nm):</label>
+            <input type="number" id="wellWidth" step="0.1" value="5.0">
+        </div>
+        <div class="input-group">
+            <label for="barrierHeight">Barrier Height (eV):</label>
+            <input type="number" id="barrierHeight" step="0.01" value="0.3">
+        </div>
+        <div class="input-group">
+            <label for="effMass">Effective Mass (m0):</label>
+            <input type="number" id="effMass" step="0.01" value="0.067">
+        </div>
+        <button onclick="runSimulation()">Generate & Run</button>
+        <div id="status">Status: Ready</div>
     </div>
-
-    <div class="main-content">
-        <h2>Results & Visualisation</h2>
-        <div id="plot_electron_structure" class="chart-container">[ Electron Structure Plot ]</div>
-        <div id="plot_eigenvalues" class="chart-container">[ Eigenvalue Energy Plot ]</div>
-    </div>
-</div>
 </body>
 </html>
