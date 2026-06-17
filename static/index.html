@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optoelectronic GUI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Optoelectronic Simulation Control Panel</h2>
+        <hr>
+        
+        <form id="simulatorForm">
+            <label for="material">Material System</label>
+            <select id="material">
+                <option value="AlGaAs">GaAs/AlGaAs</option>
+                <option value="AlGaSb">GaSb/AlGaSb</option>
+                <option value="MgZnO">ZnO/MgZnO</option>
+            </select>
+
+            <label for="well_width">Well Width (Å)</label>
+            <input type="number" id="well_width" value="50" step="0.1" required>
+
+            <label for="barrier_height">Barrier Height (eV)</label>
+            <input type="number" id="barrier_height" value="0.3" step="0.01" required>
+
+            <label for="solver">Solver Method</label>
+            <select id="solver">
+                <option value="TMM">Transfer Matrix Method (TMM)</option>
+                <option value="FDM">Finite Difference Method (FDM)</option>
+            </select>
+
+            <button type="submit">Execute Simulation</button>
+        </form>
+
+        <div id="statusIndicator" class="status-box hidden"></div>
+
+        <div class="chart-container">
+            <canvas id="resultsChart"></canvas>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
