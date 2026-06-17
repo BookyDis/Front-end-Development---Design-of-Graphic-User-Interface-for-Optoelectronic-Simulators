@@ -1,44 +1,142 @@
-<form id="simulatorForm">
-    <label for="material">Material System</label>
-    <select id="material">
-        <option value="AlGaAs">GaAs/AlGaAs System</option>
-        <option value="AlGaSb">GaSb/AlGaSb System</option>
-        <option value="MgZnO">ZnO/MgZnO System</option>
-        <option value="InGaAs_InAlAs">InGaAs/InAlAs System</option>
-    </select>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optoelectronic Quantum Well Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Optoelectronic Quantum Well Simulator</h1>
+            <p>Finite Difference Method (FDM) & Transfer Matrix Method (TMM) Solver</p>
+        </header>
 
-    <label for="solver">Solver Approach</label>
-    <select id="solver">
-        <option value="TMM">Transfer Matrix Method (TMM)</option>
-        <option value="FDM">Finite Difference Method (FDM)</option>
-    </select>
+        <div class="main-content">
+            <!-- Control Panel -->
+            <section class="control-panel">
+                <h2>Simulation Parameters</h2>
+                <form id="simulatorForm">
+                    <div class="form-group">
+                        <label for="material">Material System</label>
+                        <select id="material" required>
+                            <option value="">-- Select Material --</option>
+                            <option value="AlGaAs">GaAs/AlGaAs System</option>
+                            <option value="AlGaSb">GaSb/AlGaSb System</option>
+                            <option value="InGaAs_InAlAs">InGaAs/InAlAs System</option>
+                            <option value="InGaAs_GaAsSb">InGaAs/GaAsSb System</option>
+                        </select>
+                    </div>
 
-    <label for="subband_model">Subband Approximation Model</label>
-    <select id="subband_model">
-        <option value="parabolic">Parabolic Subband Approximation</option>
-        <option value="kane">Full Two-Band Kane Nonparabolic Model</option>
-        <option value="taylor">Taylor Expansion of Kane Nonparabolic Model</option>
-        <option value="14kp">14 kp Band Nonparabolicity Treatment (TMM Only)</option>
-    </select>
+                    <div class="form-group">
+                        <label for="solver">Solver Approach</label>
+                        <select id="solver" required>
+                            <option value="">-- Select Solver --</option>
+                            <option value="TMM">Transfer Matrix Method (TMM)</option>
+                            <option value="FDM">Finite Difference Method (FDM)</option>
+                        </select>
+                    </div>
 
-    <label for="layer_structure">Heterostructure Profile Sequence</label>
-    <span class="help-text">Format: Alternate [Width in Å] [Molar Fraction x]. Space separated.</span>
-    <textarea id="layer_structure" rows="3" placeholder="e.g., 200 0.15 150 0.0 200 0.15">200 0.15 200 0.0 200 0.15</textarea>
+                    <div class="form-group">
+                        <label for="subband_model">Subband Approximation Model</label>
+                        <select id="subband_model" required>
+                            <option value="">-- Select Model --</option>
+                            <option value="parabolic">Parabolic Subband Approximation</option>
+                            <option value="kane">Full Two-Band Kane Nonparabolic Model</option>
+                            <option value="taylor">Taylor Expansion of Kane Nonparabolic Model</option>
+                            <option value="14kp">14 k·p Band Nonparabolicity (TMM Only)</option>
+                        </select>
+                    </div>
 
-    <div class="form-row">
-        <div>
-            <label for="electric_field">Electric Field (kV/cm)</label>
-            <input type="number" id="electric_field" value="0.0" step="0.1">
-        </div>
-        <div>
-            <label for="grid_spacing">Grid Spacing dz (Å)</label>
-            <input type="number" id="grid_spacing" value="1.0" step="0.1">
-        </div>
-        <div>
-            <label for="num_states">Number of Target States</label>
-            <input type="number" id="num_states" value="4" step="1">
+                    <div class="form-group">
+                        <label for="layer_structure">Heterostructure Profile Sequence</label>
+                        <span class="help-text">Format: Alternate [Width in Å] [Molar Fraction x]. Space separated.</span>
+                        <textarea id="layer_structure" rows="4" placeholder="e.g., 200 0.15 150 0.0 200 0.15" required>200 0.15 200 0.0 200 0.15</textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="electric_field">Electric Field (kV/cm)</label>
+                            <input type="number" id="electric_field" value="0.0" step="0.1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="grid_spacing">Grid Spacing dz (Å)</label>
+                            <input type="number" id="grid_spacing" value="1.0" step="0.1" min="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="num_states">Number of Target States</label>
+                            <input type="number" id="num_states" value="4" step="1" min="1" max="20">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-primary">Execute Calculation</button>
+                    <span id="loadingSpinner" class="spinner hidden"></span>
+                </form>
+            </section>
+
+            <!-- Results Panel -->
+            <section class="results-panel">
+                <h2>Results & Analysis</h2>
+                
+                <div id="errorMessage" class="error-box hidden"></div>
+                <div id="successMessage" class="success-box hidden"></div>
+
+                <!-- Energy Levels Table -->
+                <div id="energyLevelsSection" class="results-section hidden">
+                    <h3>Energy Levels (eV)</h3>
+                    <table id="energyTable">
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Energy (eV)</th>
+                                <th>Energy (meV)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="energyTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Graphical Results -->
+                <div id="chartsSection" class="results-section hidden">
+                    <div class="chart-container">
+                        <h3>Band Structure & Potential</h3>
+                        <canvas id="potentialChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Wavefunctions</h3>
+                        <canvas id="wavefunctionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Material Info -->
+                <div id="materialInfoSection" class="results-section hidden">
+                    <h3>Material Information</h3>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h4>Band Gap (eV)</h4>
+                            <p>Well: <span id="info-bandgap-well">--</span></p>
+                            <p>Barrier: <span id="info-bandgap-barrier">--</span></p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Effective Mass (m₀)</h4>
+                            <p>Well: <span id="info-mass-well">--</span></p>
+                            <p>Barrier: <span id="info-mass-barrier">--</span></p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Kane Parameter (eV·Å²)</h4>
+                            <p>Well: <span id="info-kane-well">--</span></p>
+                            <p>Barrier: <span id="info-kane-barrier">--</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
-    <button type="submit">Execute Calculation</button>
-</form>
+    <script src="app.js"></script>
+</body>
+</html>
