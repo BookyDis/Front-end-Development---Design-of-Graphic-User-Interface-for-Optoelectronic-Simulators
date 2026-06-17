@@ -1,47 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Optoelectronic GUI</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <div class="wrapper">
-        <h2>Optoelectronic Simulation Control Panel</h2>
-        <hr>
-        
-        <form id="simulatorForm">
-            <label for="material">Material System</label>
-            <select id="material">
-                <option value="AlGaAs">GaAs/AlGaAs</option>
-                <option value="AlGaSb">GaSb/AlGaSb</option>
-                <option value="MgZnO">ZnO/MgZnO</option>
-            </select>
+<form id="simulatorForm">
+    <label for="material">Material System</label>
+    <select id="material">
+        <option value="AlGaAs">GaAs/AlGaAs System</option>
+        <option value="AlGaSb">GaSb/AlGaSb System</option>
+        <option value="MgZnO">ZnO/MgZnO System</option>
+        <option value="InGaAs_InAlAs">InGaAs/InAlAs System</option>
+    </select>
 
-            <label for="well_width">Well Width (Å)</label>
-            <input type="number" id="well_width" value="50" step="0.1" required>
+    <label for="solver">Solver Approach</label>
+    <select id="solver">
+        <option value="TMM">Transfer Matrix Method (TMM)</option>
+        <option value="FDM">Finite Difference Method (FDM)</option>
+    </select>
 
-            <label for="barrier_height">Barrier Height (eV)</label>
-            <input type="number" id="barrier_height" value="0.3" step="0.01" required>
+    <label for="subband_model">Subband Approximation Model</label>
+    <select id="subband_model">
+        <option value="parabolic">Parabolic Subband Approximation</option>
+        <option value="kane">Full Two-Band Kane Nonparabolic Model</option>
+        <option value="taylor">Taylor Expansion of Kane Nonparabolic Model</option>
+        <option value="14kp">14 kp Band Nonparabolicity Treatment (TMM Only)</option>
+    </select>
 
-            <label for="solver">Solver Method</label>
-            <select id="solver">
-                <option value="TMM">Transfer Matrix Method (TMM)</option>
-                <option value="FDM">Finite Difference Method (FDM)</option>
-            </select>
+    <label for="layer_structure">Heterostructure Profile Sequence</label>
+    <span class="help-text">Format: Alternate [Width in Å] [Molar Fraction x]. Space separated.</span>
+    <textarea id="layer_structure" rows="3" placeholder="e.g., 200 0.15 150 0.0 200 0.15">200 0.15 200 0.0 200 0.15</textarea>
 
-            <button type="submit">Execute Simulation</button>
-        </form>
-
-        <div id="statusIndicator" class="status-box hidden"></div>
-
-        <div class="chart-container">
-            <canvas id="resultsChart"></canvas>
+    <div class="form-row">
+        <div>
+            <label for="electric_field">Electric Field (kV/cm)</label>
+            <input type="number" id="electric_field" value="0.0" step="0.1">
+        </div>
+        <div>
+            <label for="grid_spacing">Grid Spacing dz (Å)</label>
+            <input type="number" id="grid_spacing" value="1.0" step="0.1">
+        </div>
+        <div>
+            <label for="num_states">Number of Target States</label>
+            <input type="number" id="num_states" value="4" step="1">
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
-</html>
+    <button type="submit">Execute Calculation</button>
+</form>

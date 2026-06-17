@@ -2,20 +2,21 @@ document.getElementById('simulatorForm').addEventListener('submit', async (e) =>
     e.preventDefault();
     
     const statusBox = document.getElementById('statusIndicator');
-    statusBox.classList.remove('hidden');
     statusBox.className = "status-box running";
-    statusBox.innerText = "Running simulation... Please wait.";
+    statusBox.innerText = "Processing numerical solvers...";
 
-    // Package the form parameters
+    // Capture the 1-for-1 package configuration fields
     const payload = {
         material: document.getElementById('material').value,
-        well_width: document.getElementById('well_width').value,
-        barrier_height: document.getElementById('barrier_height').value,
-        solver: document.getElementById('solver').value
+        solver: document.getElementById('solver').value,
+        subband_model: document.getElementById('subband_model').value,
+        layer_structure: document.getElementById('layer_structure').value,
+        electric_field: document.getElementById('electric_field').value,
+        grid_spacing: document.getElementById('grid_spacing').value,
+        num_states: document.getElementById('num_states').value
     };
 
     try {
-        // Post directly to the local Python endpoint
         const response = await fetch('/api/simulate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -27,41 +28,14 @@ document.getElementById('simulatorForm').addEventListener('submit', async (e) =>
         if (data.status === "success") {
             statusBox.className = "status-box success";
             statusBox.innerText = data.message;
-            // Trigger dynamic visualization mapping 
-            plotEnergyLevels(data.energy_levels);
+            
+            // Send the raw computational array directly to your visualization element
+            plotEnergyLevels(data.results.energies);
         } else {
             throw new Error(data.message);
         }
     } catch (error) {
         statusBox.className = "status-box error";
-        statusBox.innerText = `Simulation failed: ${error.message}`;
+        statusBox.innerText = `Simulation Error: ${error.message}`;
     }
 });
-
-let renderingChart = null;
-function plotEnergyLevels(energies) {
-    const ctx = document.getElementById('resultsChart').getContext('2d');
-    
-    // Clear old data instance if it exists
-    if (renderingChart) renderingChart.destroy();
-
-    renderingChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: energies.map((_, index) => `E${index + 1}`),
-            datasets: [{
-                label: 'Calculated Energy Levels (eV)',
-                data: energies,
-                backgroundColor: '#3498db',
-                borderColor: '#2980b9',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true, title: { display: true, text: 'Energy (eV)' } }
-            }
-        }
-    });
-}
