@@ -20,13 +20,13 @@ def home():
 
 @app.route('/api/simulate', methods=['POST'])
 def simulate():
-    """
-    Main simulation endpoint that processes quantum well calculations
-    """
+    
+    #Main simulation endpoint that processes quantum well calculations
+   
     try:
         params = request.json
         
-        # Extract parameters from GUI
+        #Extract parameters from GUI
         material_system = params.get('material')
         solver_method = params.get('solver')
         subband_model = params.get('subband_model')
@@ -36,32 +36,32 @@ def simulate():
         num_states = int(params.get('num_states', 4))
         
 
-        # Validate inputs
+        #Validate inputs
         if not material_system or not solver_method or not subband_model:
             return jsonify({"status": "error", "message": "Missing required parameters"}), 400
         
-        # Parse layer structure
+        #Parse layer structure
         tokens = raw_layers.strip().split()
         if len(tokens) % 2 != 0:
             return jsonify({"status": "error", "message": "Structure format must be pairs of Width and Molar values."}), 400
         
         layer_profile = [[float(tokens[i]), float(tokens[i+1])] for i in range(0, len(tokens), 2)]
         
-        # Create temporary layer file for Grid initialization
+        #Create temporary layer file for Grid initialization
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
             for width, molar in layer_profile:
                 f.write(f"{width} {molar}\n")
             layer_file = f.name
         
         try:
-            # Initialize Grid with the layer structure
+            #Initialize Grid with the layer structure
             composition = Composition.from_file(layer_file)
             grid = Grid(composition, grid_spacing, material_system)
             
-            # Set electric field
+            #Set electric field
             grid.set_K(electric_field)
             
-            # Select and instantiate appropriate solver
+            #Select and instantiate appropriate solver
             solver = select_solver(solver_method, subband_model, grid, num_states)
             
             if solver is None:
@@ -70,15 +70,15 @@ def simulate():
                     "message": f"Invalid combination: {solver_method} + {subband_model}"
                 }), 400
             
-            # Execute calculation
+            #Execute calculation
             energies, wavefunctions = solver.get_wavefunctions()
             
 
-            # Convert to lists for JSON serialization
+            #Convert to lists for JSON serialization
             energies_eV = energies / ConstAndScales.E
             energies_list = energies_eV.tolist() if hasattr(energies_eV, 'tolist') else list(energies_eV)
             
-            # Convert wavefunctions to serializable format
+            #Convert wavefunctions to serializable format
             wavefunctions_list = []
             for wf in wavefunctions:
                 if hasattr(wf, 'tolist'):
@@ -86,12 +86,12 @@ def simulate():
                 else:
                     wavefunctions_list.append(list(wf))
             
-            # Get grid points for plotting
+            #Get grid points for plotting
             z_points_A = grid.get_z() / ConstAndScales.ANGSTROM
             z_points = z_points_A.tolist() if hasattr(z_points_A, 'tolist') else list(z_points_A)
             
             
-            # Get potential profile
+            #Get potential profile
             potential_eV = grid.get_bandstructure_potential() / ConstAndScales.E
             potential = potential_eV.tolist()
             
@@ -111,7 +111,7 @@ def simulate():
             })
         
         finally:
-            # Clean up temporary file
+            #Clean up temporary file
             if os.path.exists(layer_file):
                 os.unlink(layer_file)
     
@@ -124,9 +124,9 @@ def simulate():
         }), 500
 
 def select_solver(solver_method, subband_model, grid, num_states):
-    """
-    Factory function to select the appropriate solver based on method and model
-    """
+    
+    #Factory function to select the appropriate solver based on method and model
+    
     if solver_method == "FDM":
         if subband_model == "parabolic":
             return Parabolic_FDM(grid, num_states)
@@ -149,9 +149,9 @@ def select_solver(solver_method, subband_model, grid, num_states):
 
 @app.route('/api/material-info', methods=['GET'])
 def material_info():
-    """
-    Endpoint to get material information for visualization
-    """
+    
+    #Endpoint to get material information for visualization
+    
     material_name = request.args.get('material')
     
     if not material_name:
@@ -160,7 +160,7 @@ def material_info():
     try:
         material = Material(material_name)
         
-        # Return material band structure information
+        #Return material band structure information
         return jsonify({
             "status": "success",
             "material": material_name,
