@@ -2,12 +2,16 @@ import os
 import json
 import io
 import tempfile
+import math
+import cmath
+
+from src import ConstAndScales
 from flask import Flask, request, jsonify, send_from_directory
 from src.Material import Material
+from src.Composition import Composition 
 from src.Grid import Grid
 from src.Solvers_FDM import Parabolic_FDM, Kane_FDM, Taylor_FDM
 from src.Solvers_TMM import Parabolic_TMM, Taylor_TMM, Kane_TMM, Ekenberg_TMM
-
 app = Flask(__name__, static_folder='static', static_url_path='')
 
 @app.route('/')
@@ -31,6 +35,7 @@ def simulate():
         grid_spacing = float(params.get('grid_spacing', 1.0))
         num_states = int(params.get('num_states', 4))
         
+
         # Validate inputs
         if not material_system or not solver_method or not subband_model:
             return jsonify({"status": "error", "message": "Missing required parameters"}), 400
@@ -50,7 +55,8 @@ def simulate():
         
         try:
             # Initialize Grid with the layer structure
-            grid = Grid(layer_file, grid_spacing, material_system)
+            composition = Composition.from_file(layer_file)
+            grid = Grid(composition, grid_spacing, material_system)
             
             # Set electric field
             grid.set_K(electric_field)
@@ -67,8 +73,10 @@ def simulate():
             # Execute calculation
             energies, wavefunctions = solver.get_wavefunctions()
             
+
             # Convert to lists for JSON serialization
-            energies_list = energies.tolist() if hasattr(energies, 'tolist') else list(energies)
+            energies_eV = energies / ConstAndScales.E
+            energies_list = energies_eV.tolist() if hasattr(energies_eV, 'tolist') else list(energies_eV)
             
             # Convert wavefunctions to serializable format
             wavefunctions_list = []
@@ -79,10 +87,13 @@ def simulate():
                     wavefunctions_list.append(list(wf))
             
             # Get grid points for plotting
-            z_points = grid.get_z().tolist() if hasattr(grid.get_z(), 'tolist') else list(grid.get_z())
+            z_points_A = grid.get_z() / ConstAndScales.ANGSTROM
+            z_points = z_points_A.tolist() if hasattr(z_points_A, 'tolist') else list(z_points_A)
+            
             
             # Get potential profile
-            potential = grid.get_bandstructure_potential().tolist()
+            potential_eV = grid.get_bandstructure_potential() / ConstAndScales.E
+            potential = potential_eV.tolist()
             
             return jsonify({
                 "status": "success",

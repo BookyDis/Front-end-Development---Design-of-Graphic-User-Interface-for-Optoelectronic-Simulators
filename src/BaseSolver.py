@@ -1,6 +1,6 @@
 #
+#   Abstract Class for all solvers
 #
-# Abstract Class for all solvers
 
 from abc import ABC, abstractmethod
 from src.Grid import Grid
@@ -13,7 +13,7 @@ class BaseSolver(ABC):
 
         Args:
             Grid (Grid): Grid object for bandstructure and effective mass
-            nEmax (int?): Max number of energy levels
+            nEmax (int): Max number of energy levels
         """
 
         self.G = Grid
@@ -21,7 +21,7 @@ class BaseSolver(ABC):
         self.meff = self.G.get_effective_mass()
         self.nE = nEmax
         
-        self.tolerance = np.float64(8.88e-16)
+        self.tolerance = np.float64(10e-16)
 
     @abstractmethod
     def get_wavefunctions(self):
